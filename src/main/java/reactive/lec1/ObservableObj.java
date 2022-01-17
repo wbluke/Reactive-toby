@@ -24,6 +24,7 @@ public class ObservableObj {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public static void main(String[] args) {
         Observer observer = new Observer() {
             @Override
@@ -42,5 +43,11 @@ public class ObservableObj {
         System.out.println(Thread.currentThread().getName() + " EXIT"); // main EXIT
         executorService.shutdown();
     }
+
+    /*
+      자바 Observable의 단점
+      1. Complete에 대한 개념이 없다.
+      2. Error에 대한 처리가 미비하다. (try-catch로 잡을건가?)
+     */
 
 }
