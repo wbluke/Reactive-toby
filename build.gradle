@@ -16,6 +16,13 @@ dependencies {
 
     implementation "io.projectreactor:reactor-core:3.4.14"
     testImplementation "io.projectreactor:reactor-test:3.4.14"
+
+    // lombok
+    implementation 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    testImplementation 'org.projectlombok:lombok:1.18.22'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+    implementation 'org.slf4j:slf4j-log4j12:1.7.29'
 }
 
 test {
