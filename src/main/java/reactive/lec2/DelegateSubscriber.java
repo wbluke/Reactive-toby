@@ -3,11 +3,11 @@ package reactive.lec2;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-public class DelegateSubscriber implements Subscriber<Integer> {
+public class DelegateSubscriber<T, R> implements Subscriber<T> {
 
-    Subscriber<? super Integer> subscriber;
+    Subscriber subscriber;
 
-    public DelegateSubscriber(Subscriber<? super Integer> subscriber) {
+    public DelegateSubscriber(Subscriber<? super R> subscriber) {
         this.subscriber = subscriber;
     }
 
@@ -17,8 +17,8 @@ public class DelegateSubscriber implements Subscriber<Integer> {
     }
 
     @Override
-    public void onNext(Integer integer) {
-        subscriber.onNext(integer);
+    public void onNext(T i) {
+        subscriber.onNext(i);
     }
 
     @Override

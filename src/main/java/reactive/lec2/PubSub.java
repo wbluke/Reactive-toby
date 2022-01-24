@@ -31,20 +31,23 @@ public class PubSub {
 //        Publisher<Integer> mapPublisher2 = mapPublisher(mapPublisher, i -> -i);
 //        mapPublisher2.subscribe(logSubscriber());
 
-        Publisher<Integer> reducePublisher = reducePublisher(publisher, 0, Integer::sum);
+        Publisher<String> mapPublisher = mapPublisher(publisher, i -> "[" + i + "]");
+        mapPublisher.subscribe(logSubscriber());
+
+        Publisher<StringBuilder> reducePublisher = reducePublisher(publisher, new StringBuilder(), (a, b) -> a.append(b).append(","));
         reducePublisher.subscribe(logSubscriber());
     }
 
-    private static Publisher<Integer> reducePublisher(Publisher<Integer> publisher, int init, BiFunction<Integer, Integer, Integer> biFunction) {
-        return new Publisher<Integer>() {
+    private static <T, R> Publisher<R> reducePublisher(Publisher<T> publisher, R init, BiFunction<R, T, R> biFunction) {
+        return new Publisher<R>() {
             @Override
-            public void subscribe(Subscriber<? super Integer> subscriber) {
-                publisher.subscribe(new DelegateSubscriber(subscriber) {
-                    int result = init;
+            public void subscribe(Subscriber<? super R> subscriber) {
+                publisher.subscribe(new DelegateSubscriber<T, R>(subscriber) {
+                    R result = init;
 
                     @Override
-                    public void onNext(Integer integer) {
-                        result = biFunction.apply(result, integer);
+                    public void onNext(T i) {
+                        result = biFunction.apply(result, i);
                     }
 
                     @Override
@@ -57,17 +60,17 @@ public class PubSub {
         };
     }
 
-    private static Publisher<Integer> mapPublisher(Publisher<Integer> publisher, Function<Integer, Integer> function) {
-        return new Publisher<Integer>() {
+    private static <T, R> Publisher<R> mapPublisher(Publisher<T> publisher, Function<T, R> function) {
+        return new Publisher<R>() {
             @Override
-            public void subscribe(Subscriber<? super Integer> subscriber) {
+            public void subscribe(Subscriber<? super R> subscriber) {
                 subscriber.onSubscribe(new Subscription() {
                     @Override
                     public void request(long n) {
-                        publisher.subscribe(new DelegateSubscriber(subscriber) {
+                        publisher.subscribe(new DelegateSubscriber<T, R>(subscriber) {
                             @Override
-                            public void onNext(Integer integer) {
-                                subscriber.onNext(function.apply(integer));
+                            public void onNext(T i) {
+                                subscriber.onNext(function.apply(i));
                             }
                         });
                     }
@@ -105,8 +108,8 @@ public class PubSub {
         };
     }
 
-    private static Subscriber<Integer> logSubscriber() {
-        Subscriber<Integer> subscriber = new Subscriber<Integer>() {
+    private static <T> Subscriber<T> logSubscriber() {
+        return new Subscriber<>() {
             @Override
             public void onSubscribe(Subscription s) {
                 log.debug("onSubscribe");
@@ -114,7 +117,7 @@ public class PubSub {
             }
 
             @Override
-            public void onNext(Integer integer) {
+            public void onNext(T integer) {
                 log.debug("onNext: {}", integer);
             }
 
@@ -128,7 +131,6 @@ public class PubSub {
                 log.debug("onComplete");
             }
         };
-        return subscriber;
     }
 
 }
